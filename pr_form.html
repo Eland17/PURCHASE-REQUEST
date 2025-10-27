@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Requisition - Accurate Style</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<style>
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  background-color: #ECE9D8;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.form-window {
+  width: 960px;
+  background-color: #F0F0F0; /* abu muda */
+  border: 1px solid #888;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  margin-top: 40px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.header {
+  background-color: #D9E1F2;
+  border-bottom: 1px solid #999;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 { font-size: 18px; margin: 0; font-weight: bold; }
+.header-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+select, input[type="checkbox"] { font-size: 13px; }
+
+.section {
+  background-color: #F0F0F0; /* abu muda seragam */
+  padding: 12px 15px;
+  border-bottom: 1px solid #ccc;
+}
+
+.form-row { display: flex; align-items: center; margin-bottom: 6px; }
+.form-row label { width: 130px; font-weight: bold; color: #333; }
+.form-row input[type="text"],
+.form-row input[type="date"],
+.form-row input[type="number"] {
+  border: 1px solid #aaa;
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+#requestNo, #requestDate { width: 200px; }
+
+.table-container {
+  padding: 15px;
+  background-color: #F0F0F0; /* abu muda */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background-color: #F0F0F0; /* abu muda untuk semua sel */
+}
+
+th, td {
+  border: 1px solid #bbb;
+  padding: 6px 8px; /* padding lebih rapi */
+}
+
+th {
+  background-color: #D9E1F2; /* sama dengan header form */
+  text-align: center;
+  font-weight: bold;
+}
+
+td input {
+  width: 100%;
+  border: none;
+  padding: 4px 6px;
+  font-size: 13px;
+  background-color: transparent;
+}
+td input:focus { outline: 1px solid #b0c4de; background-color: #fff; }
+
+/* Rata tengah kolom tertentu */
+td:nth-child(2) input,
+td:nth-child(3) input,
+td:nth-child(6) input,
+td:nth-child(7) input { text-align: center; }
+
+/* Hilangkan spinner number input */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+tfoot td { border: none; padding-top: 5px; }
+.add-row-btn {
+  background-color: #E7EEF9;
+  border: 1px solid #999;
+  border-radius: 2px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.add-row-btn:hover { background-color: #d0d8eb; }
+
+textarea {
+  width: 100%;
+  height: 60px;
+  border: 1px solid #aaa;
+  margin-top: 8px;
+  font-size: 13px;
+  border-radius: 2px;
+  padding: 5px;
+  background-color: #FFF; /* biar teks jelas */
+}
+
+.footer {
+  background-color: #F0F0F0; /* abu muda */
+  border-top: 1px solid #aaa;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 15px;
+}
+
+button {
+  background-color: #D9E1F2;
+  border: 1px solid #666;
+  border-radius: 3px;
+  padding: 5px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover { background-color: #c8d6ec; }
+</style>
+</head>
+<body>
+
+<div class="form-window">
+  <div class="header">
+    <h1>Purchase Requisition</h1>
+    <div class="header-right">
+      <label>Template:</label>
+      <select>
+        <option>Purchase Requisition</option>
+      </select>
+      <label>Status:</label>
+      <select id="status">
+        <option>Submitted</option>
+        <option>Proses</option>
+        <option>Rejected</option>
+        <option>Closed</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="form-row">
+      <label>Request No.</label>
+      <input type="text" id="requestNo" readonly>
+    </div>
+    <div class="form-row">
+      <label>Request Date</label>
+      <input type="date" id="requestDate" readonly>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th style="width:22%;">Description</th>
+          <th style="width:6%;">Qty</th>
+          <th style="width:6%;">Unit</th>
+          <th style="width:12%;">Required Date</th>
+          <th style="width:14%;">Notes</th>
+          <th style="width:8%;">Qty Ordered</th>
+          <th style="width:8%;">Qty Received</th>
+          <th style="width:14%;">Project</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="8">
+            <button type="button" class="add-row-btn" onclick="addRow()">+ Add Row</button>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <label style="font-weight:bold;margin-top:10px;display:block;">Description:</label>
+    <textarea id="description"></textarea>
+  </div>
+
+  <div class="footer">
+    <button onclick="savePR()">💾 Save</button>
+    <button onclick="saveAndNew()">Save & New</button>
+    <button onclick="cancelPR()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyACOluEhfPw4JBlBaHyXtf1k3TIJAHikKo",
+  authDomain: "inventory-gudang-16dfe.firebaseapp.com",
+  projectId: "inventory-gudang-16dfe",
+  storageBucket: "inventory-gudang-16dfe.appspot.com",
+  messagingSenderId: "663364522026",
+  appId: "1:663364522026:web:6ee9d76e506d6cf43eb289"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let currentPRDocId = null;
+
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+function addRow() {
+  const tbody = document.querySelector("#itemsTable tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input type="text" placeholder="Description"></td>
+    <td><input type="number" min="0" step="0.01"></td>
+    <td><input type="text" placeholder="Unit"></td>
+    <td><input type="date"></td>
+    <td><input type="text" placeholder="Notes"></td>
+    <td><input type="number" min="0" step="0.01"></td>
+    <td><input type="number" min="0" step="0.01"></td>
+    <td><input type="text" placeholder="Project"></td>
+  `;
+  tbody.appendChild(row);
+}
+
+async function loadPR(prNo){
+  if(!prNo) return addRow();
+  try {
+    const snapshot = await db.collection("purchaseRequests")
+      .where("header.request_no","==",prNo).limit(1).get();
+    if(snapshot.empty){ alert("PR tidak ditemukan!"); addRow(); return; }
+    const doc = snapshot.docs[0];
+    currentPRDocId = doc.id;
+    const prData = doc.data();
+    const header = prData.header || {};
+    const details = prData.details || [];
+
+    document.getElementById("requestNo").value = header.request_no || '';
+    document.getElementById("requestDate").value = header.request_date || '';
+    document.getElementById("status").value = header.status || 'Submitted';
+    document.getElementById("description").value = header.description || '';
+
+    const tbody = document.querySelector("#itemsTable tbody");
+    tbody.innerHTML = '';
+    details.forEach(item=>{
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" value="${item.description||''}"></td>
+        <td><input type="number" min="0" step="0.01" value="${item.qty||0}"></td>
+        <td><input type="text" value="${item.unit||''}"></td>
+        <td><input type="date" value="${item.required_date||''}"></td>
+        <td><input type="text" value="${item.notes||''}"></td>
+        <td><input type="number" min="0" step="0.01" value="${item.qtyOrdered||0}"></td>
+        <td><input type="number" min="0" step="0.01" value="${item.qtyReceived||0}"></td>
+        <td><input type="text" value="${item.project||''}"></td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch(e){ console.error(e); alert("Gagal memuat PR"); addRow(); }
+}
+
+async function generateRequestNo() {
+  try {
+    const today = new Date();
+    const yyyymmdd = today.toISOString().split('T')[0].replace(/-/g, '');
+    const prefix = `PR/${yyyymmdd}/`;
+    let newNumber = 1;
+    const snapshot = await db.collection("purchaseRequests")
+      .where("header.request_no", ">=", prefix)
+      .where("header.request_no", "<", prefix + "\uf8ff")
+      .get();
+    if(!snapshot.empty){
+      const allNos = snapshot.docs.map(doc=>doc.data().header.request_no);
+      const lastSeq = Math.max(...allNos.map(no=>parseInt(no.split("/")[2])||0));
+      newNumber = lastSeq+1;
+    }
+    const formattedNo = prefix + newNumber.toString().padStart(4,"0");
+    document.getElementById("requestNo").value = formattedNo;
+    document.getElementById("requestDate").value = today.toISOString().split('T')[0];
+  } catch(e){
+    console.error(e);
+    const today = new Date();
+    const yyyymmdd = today.toISOString().split('T')[0].replace(/-/g,'');
+    document.getElementById("requestNo").value = `PR/${yyyymmdd}/0001`;
+    document.getElementById("requestDate").value = today.toISOString().split('T')[0];
+  }
+}
+
+async function savePR(goToList=true){
+  const requestNo = document.getElementById("requestNo").value.trim();
+  const requestDate = document.getElementById("requestDate").value;
+  const description = document.getElementById("description").value;
+  const status = document.getElementById("status").value;
+
+  if(!requestNo||!requestDate){ alert("Request No dan Request Date wajib diisi!"); return; }
+
+  const items=[];
+  document.querySelectorAll("#itemsTable tbody tr").forEach(row=>{
+    const inputs=row.querySelectorAll("input");
+    if(inputs[0].value){
+      items.push({
+        description: inputs[0].value,
+        qty: Number(inputs[1].value||0),
+        unit: inputs[2].value,
+        required_date: inputs[3].value,
+        notes: inputs[4].value,
+        qtyOrdered: Number(inputs[5].value||0),
+        qtyReceived: Number(inputs[6].value||0),
+        project: inputs[7].value
+      });
+    }
+  });
+
+  const prData = {
+    header: {request_no:requestNo, request_date:requestDate, status, description},
+    details: items,
+    createdAt: new Date()
+  };
+
+  try{
+    if(currentPRDocId){
+      await db.collection("purchaseRequests").doc(currentPRDocId).set(prData);
+    } else {
+      await db.collection("purchaseRequests").add(prData);
+    }
+    alert("✅ PR berhasil disimpan!");
+    if(goToList) window.location.href='index.html';
+  } catch(e){ console.error(e); alert("Gagal menyimpan PR"); }
+}
+
+async function saveAndNew(){ await savePR(false); clearForm(); await generateRequestNo(); }
+
+function clearForm(){
+  document.getElementById("description").value="";
+  document.getElementById("status").value="Submitted";
+  document.querySelector("#itemsTable tbody").innerHTML="";
+  addRow();
+}
+
+function cancelPR(){ window.location.href='index.html'; }
+
+addRow();
+const prNoParam = getQueryParam('prno');
+if(prNoParam){ loadPR(prNoParam); } else { generateRequestNo(); }
+</script>
+</body>
+</html>

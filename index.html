@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Purchase Requisition (PR)</title>
+<style>
+body { font-family: Tahoma, Arial, sans-serif; font-size:11px; background:#ECE9D8; padding:26px; margin:0; }
+.list-container { width:1040px; margin:0 auto; background:#F0F0F0; border:1px solid #999; box-shadow:5px 5px 13px rgba(0,0,0,0.4); padding:20px; }
+h1 { font-size:21px; font-weight:bold; color:#000; border-bottom:2px solid #A0A0A0; padding-bottom:7px; margin-top:0; margin-bottom:20px; }
+.list-table { width:100%; border-collapse:collapse; font-size:11px; background:white; border:1px solid #A0A0A0; table-layout:fixed; }
+.list-table th { background:#E3E3E3; border:1px solid #A0A0A0; padding:7px; font-weight:bold; text-align:center; }
+.list-table td { border:1px solid #D4D0C8; padding:5px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.list-table tr:hover { background:#F0F8FF; }
+.col-no { width:15%; text-align:center; }
+.col-date { width:12%; text-align:center; }
+.col-desc { width:46%; }
+.col-status { width:15%; text-align:center; }
+.pr-link { color:#0000FF; text-decoration:underline; cursor:pointer; }
+.toolbar { display:flex; justify-content:flex-end; gap:10px; margin-bottom:13px; }
+.toolbar button { background:#EBEBEB; border:1px solid #777; padding:5px 10px; cursor:pointer; font-size:11px; font-weight:bold; }
+.empty-message { text-align:center; padding:26px; color:#555; font-style:italic; }
+.pagination button { background:#EBEBEB; border:1px solid #777; padding:3px 8px; margin:0 3px; cursor:pointer; font-size:11px; }
+.pagination button.active { font-weight:bold; background:#D0D0D0; }
+</style>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+</head>
+<body>
+
+<div class="list-container" id="list_content_to_export">
+    <h1>Daftar Purchase Requisition</h1>
+
+    <div class="toolbar">
+        <button onclick="window.location.href='pr_form.html'">+ Buat PR Baru</button>
+        <button onclick="exportToExcel('pr_list_table', 'Daftar_PR')">Export ke Excel</button>
+    </div>
+
+    <table class="list-table" id="pr_list_table">
+        <thead>
+            <tr>
+                <th class="col-no">Request No.</th>
+                <th class="col-date">Request Date</th>
+                <th class="col-date">Required Date</th>
+                <th class="col-desc">Description</th>
+                <th class="col-status">Status</th>
+            </tr>
+        </thead>
+        <tbody id="pr_list_body">
+            <tr><td colspan="5" class="empty-message">Memuat data...</td></tr>
+        </tbody>
+    </table>
+
+    <div class="pagination" id="pr_pagination"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyACOluEhfPw4JBlBaHyXtf1k3TIJAHikKo",
+  authDomain: "inventory-gudang-16dfe.firebaseapp.com",
+  projectId: "inventory-gudang-16dfe",
+  storageBucket: "inventory-gudang-16dfe.appspot.com",
+  messagingSenderId: "663364522026",
+  appId: "1:663364522026:web:6ee9d76e506d6cf43eb289"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const tableBody = document.getElementById('pr_list_body');
+const rowsPerPage = 20;
+let currentPage = 1;
+let prArrayGlobal = [];
+
+// ===== LOAD PR LIST =====
+async function loadPRList(){
+    const snapshot = await db.collection("purchaseRequests").orderBy("header.request_date","desc").get();
+    prArrayGlobal = snapshot.docs.map(doc => doc.data());
+
+    if(prArrayGlobal.length===0){
+        tableBody.innerHTML = '<tr><td colspan="5" class="empty-message">Belum ada Purchase Requisition yang tersimpan.</td></tr>';
+        document.getElementById('pr_pagination').innerHTML = '';
+        return;
+    }
+
+    // Urut: status "Submitted" di atas
+    prArrayGlobal.sort((a,b)=>{
+        if(a.header.status==='Submitted' && b.header.status!=='Submitted') return -1;
+        if(a.header.status!=='Submitted' && b.header.status==='Submitted') return 1;
+        return new Date(b.header.request_date) - new Date(a.header.request_date);
+    });
+
+    currentPage=1;
+    showPage(currentPage);
+}
+
+function showPage(page){
+    tableBody.innerHTML = '';
+    const start = (page-1)*rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageItems = prArrayGlobal.slice(start,end);
+
+    pageItems.forEach(pr=>{
+        const row = tableBody.insertRow();
+        const prNo = pr.header.request_no;
+        const prHeader = pr.header;
+        const prDetails = pr.details || [];
+
+        const headerDesc = prHeader.description ? prHeader.description.trim() : '';
+        const itemDescriptions = prDetails.map(item=>item.description).filter(d=>d&&d.trim()!=='');
+        const combinedItemDesc = itemDescriptions.join(', ');
+        const finalDisplay = combinedItemDesc ? (headerDesc ? combinedItemDesc+' ('+headerDesc+')' : combinedItemDesc) : (headerDesc||'N/A');
+
+        const requiredDates = prDetails.map(item=>item.required_date).filter(d=>d);
+        const minRequiredDate = requiredDates.length>0 ? requiredDates.sort()[0] : '';
+
+        const cellNo = row.insertCell(); cellNo.classList.add('col-no');
+        cellNo.innerHTML = `<span class="pr-link" onclick="openPRDetail('${prNo}')">${prNo}</span>`;
+        const cellDate = row.insertCell(); cellDate.classList.add('col-date'); cellDate.textContent = formatDateDisplay(prHeader.request_date);
+        const cellRequired = row.insertCell(); cellRequired.classList.add('col-date'); cellRequired.textContent = formatDateDisplay(minRequiredDate);
+        const cellDesc = row.insertCell(); cellDesc.classList.add('col-desc'); cellDesc.textContent = finalDisplay;
+        const cellStatus = row.insertCell(); cellStatus.classList.add('col-status'); cellStatus.textContent = prHeader.status;
+    });
+
+    renderPagination();
+}
+
+function renderPagination(){
+    const totalPages = Math.ceil(prArrayGlobal.length/rowsPerPage);
+    const paginationDiv = document.getElementById('pr_pagination');
+    paginationDiv.innerHTML='';
+
+    for(let i=1;i<=totalPages;i++){
+        const btn=document.createElement('button');
+        btn.textContent=i;
+        btn.className=(i===currentPage)?'active':'';
+        btn.onclick=()=>{currentPage=i; showPage(currentPage);};
+        paginationDiv.appendChild(btn);
+    }
+}
+
+function openPRDetail(prNo){
+    window.location.href=`pr_form.html?prno=${encodeURIComponent(prNo)}`;
+}
+
+function formatDateDisplay(dateString){
+    if(!dateString) return '';
+    const parts=dateString.split('-');
+    return parts.length===3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateString;
+}
+
+// ===== EXPORT KE EXCEL =====
+function exportToExcel(tableID, filename=''){
+    const tableSelect=document.getElementById(tableID);
+    if(!tableSelect){ alert('Tabel tidak ditemukan'); return; }
+    const dataType='application/vnd.ms-excel';
+    const tempDiv=document.createElement('div'); 
+    tempDiv.innerHTML=tableSelect.outerHTML;
+    tempDiv.querySelectorAll('.pr-link').forEach(link=>link.outerHTML=link.textContent);
+    let tableHTML=tempDiv.innerHTML.replace(/ /g,'%20');
+    filename=filename?filename+'.xls':'excel_data.xls';
+    const downloadLink=document.createElement('a'); document.body.appendChild(downloadLink);
+    if(navigator.msSaveOrOpenBlob){
+        const blob=new Blob(['\ufeff',tableHTML],{type:dataType});
+        navigator.msSaveOrOpenBlob(blob,filename);
+    }else{
+        downloadLink.href='data:'+dataType+','+tableHTML;
+        downloadLink.download=filename;
+        downloadLink.click();
+    }
+    document.body.removeChild(downloadLink);
+}
+
+// ===== REALTIME UPDATE =====
+db.collection("purchaseRequests").onSnapshot(()=>{
+    loadPRList();
+});
+
+document.addEventListener('DOMContentLoaded', loadPRList);
+</script>
+
+</body>
+</html>
