@@ -72,6 +72,7 @@ body {
   padding: 4px 6px;
   font-size: 13px;
   background-color: #FFF;
+  box-sizing: border-box; /* penting supaya input pas kolom */
 }
 #requestNo, #requestDate { width: 200px; }
 .table-container {
@@ -102,6 +103,7 @@ td input {
   padding: 4px 6px;
   font-size: 13px;
   background-color: transparent;
+  box-sizing: border-box; /* supaya input pas kolom */
 }
 td input:focus {
   outline: 1px solid #b0c4de;
@@ -131,6 +133,7 @@ textarea {
   border-radius: 3px;
   padding: 5px;
   background-color: #FFF;
+  box-sizing: border-box;
 }
 .footer {
   background-color: #EDEDED;
@@ -194,14 +197,14 @@ button:hover { background-color: #E0E0E0; }
     <table id="itemsTable">
       <thead>
         <tr>
-          <th style="width:30%;">Description</th>
+          <th style="width:32%;">Description</th>
           <th style="width:6%;">Qty</th>
           <th style="width:6%;">Unit</th>
           <th style="width:12%;">Required Date</th>
-          <th style="width:16%;">Notes</th>
+          <th style="width:18%;">Notes</th>
           <th style="width:8%;">Qty Ordered</th>
           <th style="width:8%;">Qty Received</th>
-          <th style="width:14%;">Project</th>
+          <th style="width:10%;">Project</th>
         </tr>
       </thead>
       <tbody></tbody>
