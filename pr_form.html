@@ -12,7 +12,7 @@
 <style>
 body {
   font-family: Tahoma, Arial, sans-serif;
-  background-color: #F5F2E8; /* krem muda */
+  background-color: #F5F2E8;
   font-size: 13px;
   margin: 0;
   padding: 0;
@@ -23,20 +23,18 @@ body {
   color: #000;
 }
 
-/* Kontainer utama */
 .form-window {
   width: 960px;
-  background-color: #EDEDED; /* abu muda */
-  border: 1px solid #BFBFBF; /* border abu tua */
+  background-color: #EDEDED;
+  border: 1px solid #BFBFBF;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   margin-top: 40px;
   border-radius: 4px;
   overflow: hidden;
 }
 
-/* Header */
 .header {
-  background-color: #EDEDED; /* abu muda */
+  background-color: #EDEDED;
   border-bottom: 1px solid #BFBFBF;
   padding: 12px 15px;
   display: flex;
@@ -47,7 +45,6 @@ body {
   font-size: 18px;
   margin: 0;
   font-weight: bold;
-  color: #000;
 }
 .header-right {
   display: flex;
@@ -56,7 +53,6 @@ body {
   font-size: 13px;
 }
 
-/* Section form */
 .section {
   background-color: #EDEDED;
   padding: 12px 15px;
@@ -70,7 +66,6 @@ body {
 .form-row label {
   width: 130px;
   font-weight: bold;
-  color: #000;
 }
 .form-row input[type="text"],
 .form-row input[type="date"],
@@ -83,7 +78,6 @@ body {
 }
 #requestNo, #requestDate { width: 200px; }
 
-/* Tabel */
 .table-container {
   padding: 15px;
   background-color: #EDEDED;
@@ -126,12 +120,6 @@ td:nth-child(3) input,
 td:nth-child(6) input,
 td:nth-child(7) input { text-align: center; }
 
-/* Hilangkan spinner number input */
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type=number] { -moz-appearance: textfield; }
-
-/* Tombol tambah baris */
 tfoot td { border: none; padding-top: 5px; }
 .add-row-btn {
   background-color: #F2F2F2;
@@ -143,7 +131,6 @@ tfoot td { border: none; padding-top: 5px; }
 }
 .add-row-btn:hover { background-color: #E0E0E0; }
 
-/* Textarea */
 textarea {
   width: 100%;
   height: 60px;
@@ -155,7 +142,6 @@ textarea {
   background-color: #FFF;
 }
 
-/* Footer tombol */
 .footer {
   background-color: #EDEDED;
   border-top: 1px solid #BFBFBF;
@@ -176,13 +162,13 @@ button:hover {
   background-color: #E0E0E0;
 }
 
-/* Link */
-a {
-  color: #0000EE;
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
+@media print {
+  body { background: #fff; }
+  .footer button,
+  .add-row-btn,
+  .header-right select,
+  .header-right label { display: none !important; }
+  .form-window { box-shadow: none; border: none; margin: 0; }
 }
 </style>
 </head>
@@ -249,6 +235,7 @@ a:hover {
     <button onclick="savePR()">💾 Save</button>
     <button onclick="saveAndNew()">Save & New</button>
     <button onclick="cancelPR()">Cancel</button>
+    <button onclick="printPreview()">🖨️ Print Preview</button>
   </div>
 </div>
 
@@ -402,6 +389,16 @@ function clearForm(){
 }
 
 function cancelPR(){ window.location.href='index.html'; }
+
+/* ✅ Print Preview */
+function printPreview() {
+  const prNo = document.getElementById('requestNo').value.trim();
+  if (!prNo) {
+    alert("Nomor PR belum tersedia!");
+    return;
+  }
+  window.open(`pr_print.html?prno=${encodeURIComponent(prNo)}`, "_blank");
+}
 
 addRow();
 const prNoParam = getQueryParam('prno');
