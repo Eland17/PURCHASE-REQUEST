@@ -1,306 +1,207 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pr_detail_title">Purchase Requisition Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 10pt; 
-            margin: 0;
-            padding: 0;
-            color: #000;
-        }
-
-        .document-container {
-            width: 780px; 
-            margin: 30px auto; 
-            border: 1px solid #000;
-            background-color: white;
-            padding: 15px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .doc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .pr-title-box h1 {
-            font-size: 18pt;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .pr-info-box {
-            text-align: right;
-        }
-
-        .pr-info-table {
-            border-collapse: collapse;
-            font-size: 9pt;
-            margin-left: auto; 
-        }
-        .pr-info-table td {
-            padding: 1px 0;
-        }
-        .pr-info-table .label {
-            width: 90px;
-            padding-right: 5px;
-            text-align: left;
-        }
-        .pr-info-table .data {
-            border-bottom: 1px solid #000;
-            padding-right: 20px;
-            font-weight: bold;
-            text-align: left;
-        }
-
-        /* ======================= ITEM TABLE ======================= */
-        .item-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 9pt;
-            margin-bottom: 15px;
-        }
-
-        .item-table th {
-            border: 1px solid #000;
-            padding: 5px 3px;
-            text-align: center;
-            font-weight: bold;
-            background-color: #F0F0F0;
-        }
-        
-        .item-table td {
-            border: 1px solid #000;
-            padding: 7px 5px;
-            vertical-align: top;
-            height: 15px; 
-        }
-        
-        .item-table .col-no { width: 5%; text-align: center; } 
-        .item-table .col-desc { width: 40%; text-align: left; } 
-        .item-table .col-qty { width: 10%; text-align: right; }
-        .item-table .col-unit { width: 10%; text-align: center; }
-        .item-table .col-required { width: 15%; text-align: center; }
-        .item-table .col-notes { width: 20%; text-align: center; } 
-        
-        .item-table td:nth-child(1),
-        .item-table td:nth-child(4),
-        .item-table td:nth-child(5),
-        .item-table td:nth-child(6) {
-            text-align: center; 
-        }
-        .item-table td:nth-child(3) {
-            text-align: right; 
-        }
-
-        /* ======================= FOOTER ======================= */
-        .doc-footer {
-            margin-top: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        .footer-note-box {
-            width: 400px; 
-            border: 1px solid #000;
-            padding: 5px;
-            font-size: 9pt;
-            line-height: 1.2;
-            min-height: 80px; 
-        }
-        .footer-note-box strong {
-            display: block;
-            margin-bottom: 2px;
-            font-size: 9pt;
-        }
-
-        .signature-box {
-            width: 350px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 9pt;
-            text-align: center;
-        }
-        .signature-col {
-            width: 30%;
-            line-height: 1.5;
-        }
-        .signature-col .label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-        .signature-col .name-line {
-            height: 40px;
-            border-bottom: 1px solid #000;
-            margin: 25px 0 5px 0;
-            display: block;
-        }
-
-        .no-print {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .no-print button {
-            padding: 10px 20px;
-            font-size: 11pt;
-            cursor: pointer;
-        }
-
-        @media print {
-            .document-container {
-                width: 100%;
-                margin: 0;
-                border: none;
-                box-shadow: none;
-                padding: 0;
-            }
-            .no-print {
-                display: none;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Requisition - Print</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 12px;
+  margin: 20px;
+  color: #000;
+}
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.header-info div {
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+}
+.header-info .label {
+  display: inline-block;
+  width: 120px; /* lebar tetap agar titik dua sejajar */
+  font-weight: bold;
+}
+.header-info span.value {
+  margin-left: 5px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+th, td {
+  border: 1px solid #000;
+  padding: 5px;
+  font-size: 12px;
+}
+th {
+  background-color: #eee;
+  text-align: center;
+}
+td {
+  text-align: left;
+}
+td.center, td.required-date {
+  text-align: center;
+}
+.description-sign-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  align-items: stretch;
+}
+.description-full {
+  flex: 1;
+  padding: 10px;
+  background-color: #f9f9f9;
+  font-style: italic;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.description-full strong {
+  font-style: normal;
+  margin-bottom: 5px;
+}
+.signatures {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.signatures table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+.signatures td {
+  padding: 5px;
+  text-align: center;
+  vertical-align: top;
+}
+.sign-space {
+  height: 60px;
+}
+.description-sub {
+  font-style: italic;
+  padding-left: 10px;
+  font-size: 11px;
+}
+@media print {
+  body { margin:0; }
+}
+</style>
 </head>
 <body>
 
-<div class="no-print">
-    <button onclick="window.print()">Cetak Purchase Requisition (PDF)</button>
+<h2>Purchase Requisition</h2>
+
+<div class="header-info">
+  <div><span class="label">Request No</span>: <span class="value" id="requestNo"></span></div>
+  <div><span class="label">Request Date</span>: <span class="value" id="requestDate"></span></div>
 </div>
 
-<div class="document-container">
-    <div class="doc-header">
-        <div class="pr-title-box">
-            <h1>Purchase Requisition</h1>
-        </div>
-        <div class="pr-info-box">
-            <table class="pr-info-table">
-                <tr>
-                    <td class="label">Request Date</td>
-                    <td>:</td>
-                    <td class="data" id="pr_date_display"></td>
-                </tr>
-                <tr>
-                    <td class="label">Request No.</td>
-                    <td>:</td>
-                    <td class="data" id="pr_no_display"></td>
-                </tr>
-            </table>
-        </div>
-    </div>
-    
-    <table class="item-table">
-        <thead>
-            <tr>
-                <th class="col-no">No.</th>
-                <th class="col-desc">Description</th>
-                <th class="col-qty">Qty</th>
-                <th class="col-unit">Unit</th>
-                <th class="col-required">Required</th>
-                <th class="col-notes">Notes</th>
-            </tr>
-        </thead>
-        <tbody id="pr_details_body"></tbody>
+<table id="itemsTable">
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Qty</th>
+      <th>Unit</th>
+      <th>Required Date</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="description-sign-container">
+  <div class="description-full">
+    <strong>Description:</strong>
+    <span id="description"></span>
+  </div>
+  <div class="signatures">
+    <table>
+      <tr>
+        <td>Dibuat</td>
+        <td>Disetujui</td>
+        <td>Diketahui</td>
+      </tr>
+      <tr>
+        <td class="sign-space"></td>
+        <td class="sign-space"></td>
+        <td class="sign-space"></td>
+      </tr>
     </table>
-    
-    <div class="doc-footer">
-        <div class="footer-note-box">
-            <strong>Description</strong>
-            <div id="pr_header_desc"></div>
-        </div>
-        
-        <div class="signature-box">
-            <div class="signature-col">
-                <span class="label">Dibuat Oleh:</span>
-                <span class="name-line"></span>
-            </div>
-            <div class="signature-col">
-                <span class="label">Diketahui Oleh:</span>
-                <span class="name-line"></span>
-            </div>
-            <div class="signature-col">
-                <span class="label">Disetujui Oleh:</span>
-                <span class="name-line"></span>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 
 <script>
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
+const firebaseConfig = {
+  apiKey: "AIzaSyACOluEhfPw4JBlBaHyXtf1k3TIJAHikKo",
+  authDomain: "inventory-gudang-16dfe.firebaseapp.com",
+  projectId: "inventory-gudang-16dfe",
+  storageBucket: "inventory-gudang-16dfe.appspot.com",
+  messagingSenderId: "663364522026",
+  appId: "1:663364522026:web:6ee9d76e506d6cf43eb289"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    function formatDateDisplay(dateString) {
-        if (!dateString) return '';
-        const parts = dateString.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`; 
-    }
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
 
-    function loadPRForm() {
-        const prNo = getQueryParam('prno');
-        const prsJson = localStorage.getItem('purchaseRequisitions');
-        const allPRs = prsJson ? JSON.parse(prsJson) : {};
-        const pr = allPRs[prNo];
+async function loadPR(prNo){
+  if(!prNo) { alert("PR No tidak ditemukan!"); return; }
+  try {
+    const snapshot = await db.collection("purchaseRequests")
+      .where("header.request_no","==",prNo).limit(1).get();
+    if(snapshot.empty){ alert("PR tidak ditemukan!"); return; }
+    const doc = snapshot.docs[0];
+    const prData = doc.data();
+    const header = prData.header || {};
+    const details = prData.details || [];
 
-        if (!prNo || !pr) {
-            document.getElementById('pr_no_display').textContent = 'N/A';
-            document.getElementById('pr_date_display').textContent = 'N/A';
-            document.getElementById('pr_header_desc').textContent = 'Error: PR Tidak Ditemukan.';
-            document.getElementById('pr_detail_title').textContent = 'Error Print PR';
-            return;
+    document.getElementById("requestNo").textContent = header.request_no || '';
+    document.getElementById("requestDate").textContent = header.request_date || '';
+    document.getElementById("description").textContent = header.description || '';
+
+    const tbody = document.querySelector("#itemsTable tbody");
+    tbody.innerHTML = '';
+    details.forEach(item=>{
+      const mainDesc = item.description || '';
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${mainDesc}</td>
+        <td class="center">${item.qty || 0}</td>
+        <td class="center">${item.unit || ''}</td>
+        <td class="required-date">${item.required_date || ''}</td>
+      `;
+      tbody.appendChild(row);
+
+      if(item.style && item.style.toLowerCase().includes("eiger")){
+        const additionalDesc = item.eiger_description || '';
+        if(additionalDesc && additionalDesc !== mainDesc){
+          const rowDesc = document.createElement("tr");
+          rowDesc.innerHTML = `<td colspan="4" class="description-sub">${additionalDesc}</td>`;
+          tbody.appendChild(rowDesc);
         }
+      }
+    });
 
-        const header = pr.header;
-        const details = pr.details || [];
+    window.print();
+  } catch(e){ console.error(e); alert("Gagal memuat PR"); }
+}
 
-        document.getElementById('pr_detail_title').textContent = `Purchase Requisition - ${prNo}`;
-        document.getElementById('pr_no_display').textContent = header.request_no;
-        document.getElementById('pr_date_display').textContent = formatDateDisplay(header.request_date);
-        document.getElementById('pr_header_desc').textContent = header.description || '-'; 
-
-        const detailBody = document.getElementById('pr_details_body');
-        detailBody.innerHTML = ''; 
-
-        const MAX_ROWS = 10;
-
-        details.forEach((item, index) => {
-            if (index < MAX_ROWS) {
-                const row = detailBody.insertRow();
-
-                row.insertCell().textContent = index + 1; 
-                row.insertCell().textContent = item.description || '-'; 
-
-                const qtyValue = item.quantity || item.qty || item.jumlah || 0;
-                row.insertCell().textContent = Number(qtyValue).toLocaleString('id-ID');
-
-                row.insertCell().textContent = item.unit || item.satuan || item.uom || '-';
-
-                const reqDate = new Date(header.request_date);
-                reqDate.setDate(reqDate.getDate() + 1);
-                row.insertCell().textContent = formatDateDisplay(reqDate.toISOString().split('T')[0]); 
-
-                row.insertCell().textContent = item.notes || '';
-            }
-        });
-
-        const emptyRows = MAX_ROWS - details.length;
-        for (let i = 0; i < emptyRows; i++) {
-            const row = detailBody.insertRow();
-            for (let j = 0; j < 6; j++) {
-                row.insertCell().innerHTML = '&nbsp;';
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', loadPRForm);
+const prNoParam = getQueryParam('prno');
+loadPR(prNoParam);
 </script>
-
 </body>
 </html>
