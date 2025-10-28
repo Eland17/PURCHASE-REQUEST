@@ -12,7 +12,7 @@
 <style>
 body {
   font-family: Tahoma, Arial, sans-serif;
-  background-color: #ECE9D8;
+  background-color: #F5F2E8; /* krem muda */
   font-size: 13px;
   margin: 0;
   padding: 0;
@@ -20,72 +20,94 @@ body {
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
+  color: #000;
 }
 
+/* Kontainer utama */
 .form-window {
   width: 960px;
-  background-color: #F0F0F0; /* abu muda */
-  border: 1px solid #888;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background-color: #EDEDED; /* abu muda */
+  border: 1px solid #BFBFBF; /* border abu tua */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   margin-top: 40px;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
+/* Header */
 .header {
-  background-color: #D9E1F2;
-  border-bottom: 1px solid #999;
+  background-color: #EDEDED; /* abu muda */
+  border-bottom: 1px solid #BFBFBF;
   padding: 12px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-.header h1 { font-size: 18px; margin: 0; font-weight: bold; }
-.header-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-select, input[type="checkbox"] { font-size: 13px; }
-
-.section {
-  background-color: #F0F0F0; /* abu muda seragam */
-  padding: 12px 15px;
-  border-bottom: 1px solid #ccc;
+.header h1 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: bold;
+  color: #000;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
 }
 
-.form-row { display: flex; align-items: center; margin-bottom: 6px; }
-.form-row label { width: 130px; font-weight: bold; color: #333; }
+/* Section form */
+.section {
+  background-color: #EDEDED;
+  padding: 12px 15px;
+  border-bottom: 1px solid #BFBFBF;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.form-row label {
+  width: 130px;
+  font-weight: bold;
+  color: #000;
+}
 .form-row input[type="text"],
 .form-row input[type="date"],
 .form-row input[type="number"] {
-  border: 1px solid #aaa;
-  border-radius: 2px;
+  border: 1px solid #BFBFBF;
+  border-radius: 3px;
   padding: 4px 6px;
   font-size: 13px;
+  background-color: #FFF;
 }
 #requestNo, #requestDate { width: 200px; }
 
+/* Tabel */
 .table-container {
   padding: 15px;
-  background-color: #F0F0F0; /* abu muda */
+  background-color: #EDEDED;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  background-color: #F0F0F0; /* abu muda untuk semua sel */
+  background-color: #FFF;
+  border: 1px solid #BFBFBF;
 }
-
 th, td {
-  border: 1px solid #bbb;
-  padding: 6px 8px; /* padding lebih rapi */
+  border: 1px solid #BFBFBF;
+  padding: 6px 8px;
+  font-size: 13px;
 }
-
 th {
-  background-color: #D9E1F2; /* sama dengan header form */
-  text-align: center;
+  background-color: #EDEDED;
   font-weight: bold;
+  text-align: center;
 }
-
+tr:nth-child(even) {
+  background-color: #F9F9F9;
+}
 td input {
   width: 100%;
   border: none;
@@ -93,9 +115,12 @@ td input {
   font-size: 13px;
   background-color: transparent;
 }
-td input:focus { outline: 1px solid #b0c4de; background-color: #fff; }
+td input:focus {
+  outline: 1px solid #b0c4de;
+  background-color: #fff;
+}
 
-/* Rata tengah kolom tertentu */
+/* Kolom angka rata tengah */
 td:nth-child(2) input,
 td:nth-child(3) input,
 td:nth-child(6) input,
@@ -106,46 +131,59 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
+/* Tombol tambah baris */
 tfoot td { border: none; padding-top: 5px; }
 .add-row-btn {
-  background-color: #E7EEF9;
-  border: 1px solid #999;
-  border-radius: 2px;
+  background-color: #F2F2F2;
+  border: 1px solid #BFBFBF;
+  border-radius: 3px;
   padding: 5px 12px;
   cursor: pointer;
   font-size: 13px;
 }
-.add-row-btn:hover { background-color: #d0d8eb; }
+.add-row-btn:hover { background-color: #E0E0E0; }
 
+/* Textarea */
 textarea {
   width: 100%;
   height: 60px;
-  border: 1px solid #aaa;
+  border: 1px solid #BFBFBF;
   margin-top: 8px;
   font-size: 13px;
-  border-radius: 2px;
+  border-radius: 3px;
   padding: 5px;
-  background-color: #FFF; /* biar teks jelas */
+  background-color: #FFF;
 }
 
+/* Footer tombol */
 .footer {
-  background-color: #F0F0F0; /* abu muda */
-  border-top: 1px solid #aaa;
+  background-color: #EDEDED;
+  border-top: 1px solid #BFBFBF;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   padding: 10px 15px;
 }
-
 button {
-  background-color: #D9E1F2;
-  border: 1px solid #666;
+  background-color: #F2F2F2;
+  border: 1px solid #BFBFBF;
   border-radius: 3px;
-  padding: 5px 14px;
+  padding: 6px 14px;
   font-size: 13px;
   cursor: pointer;
 }
-button:hover { background-color: #c8d6ec; }
+button:hover {
+  background-color: #E0E0E0;
+}
+
+/* Link */
+a {
+  color: #0000EE;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
 <body>
